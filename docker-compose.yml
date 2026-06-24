@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: Asparagus_backend
+    restart: always
+    environment:
+      # The DB service is reachable as "postgres" inside the shared network.
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: Asparaguspgdb
+      DB_USER: admin
+      DB_PASSWORD: AsparagusPass123
+      DB_SCHEMA: public
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      CORS_ORIGINS: "*"
+    ports:
+      - "8000:8000"
+    networks:
+      - Asparagus_network
+
+networks:
+  # Join the network created by the database stack
+  # (Database/Docker/docker-compose.yml). Confirm the name with:
+  #   docker network ls
+  Asparagus_network:
+    external: true
+    name: docker_Asparagus_network
