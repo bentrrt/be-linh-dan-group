@@ -1,4 +1,31 @@
 services:
+  postgres:
+    image: postgres:16
+    container_name: Asparagus_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - Asparagus_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: Asparagus_admin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - Asparagus_network
+    depends_on:
+      - postgres
+
   backend:
     build:
       context: .
@@ -7,12 +34,12 @@ services:
     restart: always
     environment:
       # The DB service is reachable as "postgres" inside the shared network.
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: Asparaguspgdb
-      DB_USER: admin
-      DB_PASSWORD: AsparagusPass123
-      DB_SCHEMA: public
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SCHEMA: ${DB_SCHEMA}
       API_HOST: 0.0.0.0
       API_PORT: 8000
       CORS_ORIGINS: "*"
@@ -20,6 +47,16 @@ services:
       - "8000:8000"
     networks:
       - Asparagus_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+    external: true
+    name: asparagus_postgres_data
+  pgadmin_data:
+    external: true
+    name: asparagus_pgadmin_data
 
 networks:
   # Join the network created by the database stack
